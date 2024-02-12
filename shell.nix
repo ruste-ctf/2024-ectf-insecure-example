@@ -34,9 +34,9 @@ pkgs.mkShell {
 
   RUST_SRC_PATH = "${pkgs.rust.packages.stable.rustPlatform.rustLibSrc}";
  
-  eCTF2024lib = builtins.fetchGit {
-    url = "https://github.com/ruste-ctf/eCTF-2024-lib.git";
-  };
+  # eCTF2024lib = builtins.fetchGit {
+  #   url = "https://github.com/ruste-ctf/eCTF-2024-lib.git";
+  # };
   
   msdk = builtins.fetchGit {
     url = "https://github.com/Analog-Devices-MSDK/msdk.git";
@@ -46,8 +46,9 @@ pkgs.mkShell {
   shellHook =
     ''
       # eCTF-2024-lib clone
-      cp -r $eCTF2024lib $PWD/eCTF-2024-lib
-      chmod -R u+rwX,go+rX,go-w $PWD/eCTF-2024-lib
+      # rm -r $PWD/eCTF-2024-lib
+      # cp -r $eCTF2024lib $PWD/eCTF-2024-lib
+      # chmod -R u+rwX,go+rX,go-w $PWD/eCTF-2024-lib
 
       # msdk clone
       cp -r $msdk $PWD/msdk

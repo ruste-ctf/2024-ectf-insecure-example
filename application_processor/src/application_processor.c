@@ -489,14 +489,16 @@ void attempt_attest() {
 /*********************************** MAIN *************************************/
 
 int main() {
+    LED_On(LED2);
+    MXC_Delay(500000);
+    ap_function();
+    
     // Initialize board
     init();
 
     // Print the component IDs to be helpful
     // Your design does not need to do this
     print_info("Application Processor Started\n");
-
-    rust_function();
 
     // Handle commands forever
     char buf[100];
