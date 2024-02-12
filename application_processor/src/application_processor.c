@@ -39,6 +39,7 @@
 // Includes from containerized build
 #include "ectf_params.h"
 #include "global_secrets.h"
+#include "libectf_2024.h"
 
 /********************************* CONSTANTS **********************************/
 
@@ -494,6 +495,8 @@ int main() {
     // Print the component IDs to be helpful
     // Your design does not need to do this
     print_info("Application Processor Started\n");
+
+    rust_function();
 
     // Handle commands forever
     char buf[100];
