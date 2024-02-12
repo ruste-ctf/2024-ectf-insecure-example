@@ -23,6 +23,7 @@
 
 #include "simple_i2c_peripheral.h"
 #include "board_link.h"
+#include "libectf_2024.h"
 
 // Includes from containerized build
 #include "ectf_params.h"
@@ -206,6 +207,7 @@ void process_attest() {
 
 int main(void) {
     printf("Component Started\n");
+    rust_function();
     
     // Enable Global Interrupts
     __enable_irq();
