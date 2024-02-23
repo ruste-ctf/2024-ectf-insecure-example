@@ -81,12 +81,10 @@ def build_ap(
     output = asyncio.run(run_shell(
         f"cd {design} && "
         f"pwd && "
-        f"nix-shell --command "
-        f"\"cd application_processor && "
-        f" make clean && "
+        f"cd application_processor && "
         f" make && make release && "
         f" cp build/max78000.elf {output_elf} && "
-        f" cp build/max78000.bin {output_bin}\""
+        f" cp build/max78000.bin {output_bin}"
     ))
 
     if not os.path.exists(output_bin):

@@ -6,11 +6,8 @@ __check_defined = \
 	$(if $(value $1),, \
 		$(error Undefined $1))
 
-RUST_LIB_PATH = "../eCTF-2024-lib/"
-
 all:
 	echo "#define SECRET 1234" > global_secrets.h
-	cd $(RUST_LIB_PATH) && cargo build --release
 
 clean:
 	rm -f global_secrets.h

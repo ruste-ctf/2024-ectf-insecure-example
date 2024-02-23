@@ -29,11 +29,8 @@ def build_depl(
     logger.info("Running build")
     output = asyncio.run(run_shell(
         f"cd {design} && "
-        f"pwd && "
-        f"nix-shell --command "
-        f"\"cd deployment && "
-        f" make clean && "
-        f" make\""
+        f"cd deployment && "
+        f" make"
     ))
 
     logger.info("Built deployment")

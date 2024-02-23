@@ -23,7 +23,7 @@ IPATH+=inc/
 VPATH+=src/
 
 PROJ_LIBS+=ectf_2024
-PROJ_LDFLAGS+=-L../eCTF-2024-lib/target/thumbv7em-none-eabi/release/
+PROJ_LDFLAGS+=-L../lib-build/
 
 # ****************** eCTF Bootloader *******************
 # DO NOT REMOVE
