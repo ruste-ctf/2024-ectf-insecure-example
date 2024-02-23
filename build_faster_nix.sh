@@ -110,15 +110,14 @@ function upload() {
 DEBUG_MODE=1
 TARGET_PATH="debug"
 CARGO_OPTION=""
-COMP_OR_AP="comp"
 
 if [ -z $1 ]; then
   echo -e $BIRed"Please provide 'comp' or 'ap' to select target"$Color_Off
   exit 1
 elif [ $1 = "comp" ]; then
-  $COMP_OR_AP="comp"
+  COMP_OR_AP="comp"
 elif [ $1 = "ap" ]; then
-  $COMP_OR_AP="ap"
+  COMP_OR_AP="ap"
 else
   echo -e $BIRed"Unknown Option:\nHelp:\n\tComponent: 'comp'\n\tApplication Processor: 'ap'\n"$Color_Off
   exit 1
