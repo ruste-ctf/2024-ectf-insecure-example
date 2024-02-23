@@ -371,3 +371,4 @@ component/inc/ectf_params.h
 component/inc/libectf_2024.h
 deployment/global_secrets.h
 eCTF-2024-lib/
+lib-build/
