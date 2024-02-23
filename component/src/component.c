@@ -206,12 +206,11 @@ void process_attest() {
 /*********************************** MAIN *************************************/
 
 int main(void) {
-    printf("Component Started\n");
+    comp_function();
     
     // Enable Global Interrupts
     __enable_irq();
 
-    comp_function();
     
     // Initialize Component
     i2c_addr_t addr = component_id_to_i2c_addr(COMPONENT_ID);

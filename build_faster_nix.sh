@@ -85,21 +85,56 @@ function skip_thing {
   echo -e "LOG: "$Blue$1" ... "$BIYellow"Skip"$Color_Off
 }
 
+function upload() {
+  start_thing "Uploading"
+  if openocd -s $MAXIM_PATH/Tools/OpenOCD/scripts -f interface/cmsis-dap.cfg -f target/max78000.cfg -c "program $1 verify; init; reset run; exit" > $EXAMPLE_PATH/lib-build/openocd.log 2>&1; then
+    done_thing
+  else
+    echo -e $BIRed"Failed to upload"$Color_Off
+    cat $EXAMPLE_PATH/lib-build/openocd.log
+    echo
+    echo "--------------------------------------------------------------------------------"
+    echo "Are you sure the board is plugged in?"
+    echo
+    echo "If you are sure the board is plugged-in and"
+    echo "working, you can try to follow the below"
+    echo "guide on how to set linux permissions for DAPLINK."
+    echo "https://forgge.github.io/theCore/guides/running-openocd-without-sudo.html"
+    echo
+    echo "--------------------------------------------------------------------------------"
+    echo
+    exit 1
+  fi
+}
+
 DEBUG_MODE=1
 TARGET_PATH="debug"
 CARGO_OPTION=""
+COMP_OR_AP="comp"
 
 if [ -z $1 ]; then
+  echo -e $BIRed"Please provide 'comp' or 'ap' to select target"$Color_Off
+  exit 1
+elif [ $1 = "comp" ]; then
+  $COMP_OR_AP="comp"
+elif [ $1 = "ap" ]; then
+  $COMP_OR_AP="ap"
+else
+  echo -e $BIRed"Unknown Option:\nHelp:\n\tComponent: 'comp'\n\tApplication Processor: 'ap'\n"$Color_Off
+  exit 1
+fi
+
+if [ -z $2 ]; then
   echo -e $BIYellow"No Option Provided, defaulting to Debug Mode..." $Color_Off
-elif [ $1 = "--debug" ]; then
+elif [ $2 = "--debug" ]; then
   echo -e $BIGreen"Compiling in Debug Mode"$Color_Off
-elif [ $1 = "--release" ]; then
+elif [ $2 = "--release" ]; then
   echo -e $BIGreen"Compiling in Release Mode"$Color_Off
   $DEBUG_MODE = 0
   $TARGET_PATH="release"
   $CARGO_OPTION="--release"
 else
-  printf $BIRed"Unknown Option:\nHelp:\n\tDebug Mode: --debug\n\tRelease Mode: --release\n\n" $Color_Off
+  echo -ne $BIRed"Unknown Option:\nHelp:\n\tDebug Mode: --debug\n\tRelease Mode: --release\n\n" $Color_Off
   exit 1
 fi
 
@@ -148,29 +183,32 @@ done_thing
 start_thing "Building Dependencies"
 poetry run ectf_build_depl -d . >> $EXAMPLE_PATH/lib-build/poetry.log 2>&1
 done_thing
-start_thing "Building Application Processor"
-poetry run ectf_build_ap -d . -on ap --p 123456 -c 2 -ids "0x11111124, 0x11111125" -b "Test boot message" -t 0123456789abcdef -od build >> $EXAMPLE_PATH/lib-build/poetry.log 2>&1
-done_thing
 
-start_thing "Uploading"
-if openocd -s $MAXIM_PATH/Tools/OpenOCD/scripts -f interface/cmsis-dap.cfg -f target/max78000.cfg -c "program build/ap.elf verify; init; reset run; exit" > $EXAMPLE_PATH/lib-build/openocd.log 2>&1; then
-  done_thing
+if [ $COMP_OR_AP = "ap" ]; then
+  start_thing "Building Application Processor"
+  if poetry run ectf_build_ap -d . -on ap --p 123456 -c 2 -ids "0x11111124, 0x11111125" -b "Test boot message" -t 0123456789abcdef -od build >> $EXAMPLE_PATH/lib-build/poetry.log 2>&1; then
+    done_thing
+  else
+    echo -e $BIRed"Failed to build Application Processor"
+    cat $EXAMPLE_PATH/lib-build/poetry.log
+    exit 1
+  fi
+  upload "build/ap.elf"
+elif [ $COMP_OR_AP = "comp" ]; then
+  start_thing "Building Component"
+  if poetry run ectf_build_comp -d . -on comp -od build -id 0x11111125 -b "Component boot" -al "McLean" -ad "08/08/08" -ac "Fritz" >> $EXAMPLE_PATH/lib-build/poetry.log 2>&1; then
+    done_thing
+  else
+    echo -e $BIRed"Failed to build Component"$Color_Off
+    cat $EXAMPLE_PATH/lib-build/poetry.log
+    exit 1
+  fi
+  upload "build/comp.elf"
 else
-  echo -e $BIRed"Failed to upload"$Color_Off
-  cat $EXAMPLE_PATH/lib-build/openocd.log
-  echo
-  echo "--------------------------------------------------------------------------------"
-  echo "Are you sure the board is plugged in?"
-  echo
-  echo "If you are sure the board is plugged-in and"
-  echo "working, you can try to follow the below"
-  echo "guide on how to set linux permissions for DAPLINK."
-  echo "https://forgge.github.io/theCore/guides/running-openocd-without-sudo.html"
-  echo
-  echo "--------------------------------------------------------------------------------"
-  echo
+  echo "Dont know how we got here, but failing!"
   exit 1
 fi
+
 
 start_thing "Waiting for device to reconnect"
 sleep 2

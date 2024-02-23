@@ -81,7 +81,7 @@ def build_ap(
     output = asyncio.run(run_shell(
         f"cd {design} && "
         f"pwd && "
-        f"cd application_processor && "
+        f"cd application_processor && make clean && "
         f" make && make release && "
         f" cp build/max78000.elf {output_elf} && "
         f" cp build/max78000.bin {output_bin}"
