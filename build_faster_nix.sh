@@ -252,7 +252,8 @@ fi
 
 
 start_thing "Waiting for device to reconnect"
-while [ ! -f /dev/ttyACM0 ]; do
+while [ ! -e /dev/ttyACM0 ]; do
+  echo -n "."
   sleep 1
 done
 done_thing
