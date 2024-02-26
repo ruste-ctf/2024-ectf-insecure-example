@@ -107,6 +107,48 @@ function upload() {
   fi
 }
 
+
+if [ ! -f user_dir_config.cfg ]; then
+  echo -e $BIRed"Cannot Find 'user_dir_config.cfg' making a new one..."$Color_Off
+  touch user_dir_config.cfg
+  echo -e "# Put your paths to the libs in here!" >> user_dir_config.cfg
+  echo "export HAL_PATH=\"/path/to/max78000\"" >> user_dir_config.cfg
+  echo "export LIB_PATH=\"/path/to/eCTF-2024-lib\"" >> user_dir_config.cfg
+  echo "export EXAMPLE_PATH=\"/path/to/2024-insecure-example\"" >> user_dir_config.cfg
+  echo "export MAXIM_PATH=\"/path/to/msdk\"" >> user_dir_config.cfg
+  echo  >> user_dir_config.cfg
+  echo
+  echo "Please change the paths in 'user_dir_config.cfg' to match the real paths"
+  echo "of the objects specified."
+  exit 1
+fi
+
+source user_dir_config.cfg
+
+if [ ! -d $HAL_PATH ]; then
+  echo -e $BIRed"Cannot find directory: HAL_PATH ($HAL_PATH), please" 
+  echo -e "update 'user_dir_config.cfg' with the correct path!"$Color_Off
+  exit 1
+fi
+  
+if [ ! -d $LIB_PATH ]; then
+  echo -e $BIRed"Cannot find directory: LIB_PATH ($LIB_PATH), please" 
+  echo -e "update 'user_dir_config.cfg' with the correct path!"$Color_Off
+  exit 1
+fi
+
+if [ ! -d $EXAMPLE_PATH ]; then
+  echo -e $BIRed"Cannot find directory: EXAMPLE_PATH ($EXAMPLE_PATH), please" 
+  echo -e "update 'user_dir_config.cfg' with the correct path!"$Color_Off
+  exit 1
+fi
+
+if [ ! -d $MAXIM_PATH ]; then
+  echo -e $BIRed"Cannot find directory: MAXIM_PATH ($MAXIM_PATH), please" 
+  echo -e "update 'user_dir_config.cfg' with the correct path!"$Color_Off
+  exit 1
+fi
+
 DEBUG_MODE=1
 TARGET_PATH="debug"
 CARGO_OPTION=""
@@ -125,22 +167,23 @@ fi
 
 if [ -z $2 ]; then
   echo -e $BIYellow"No Option Provided, defaulting to Debug Mode..." $Color_Off
+  DEBUG_MODE=1
+  TARGET_PATH="debug"
+  CARGO_OPTION=""
 elif [ $2 = "--debug" ]; then
   echo -e $BIGreen"Compiling in Debug Mode"$Color_Off
+  DEBUG_MODE=1
+  TARGET_PATH="debug"
+  CARGO_OPTION=""
 elif [ $2 = "--release" ]; then
   echo -e $BIGreen"Compiling in Release Mode"$Color_Off
-  $DEBUG_MODE = 0
-  $TARGET_PATH="release"
-  $CARGO_OPTION="--release"
+  DEBUG_MODE=0
+  TARGET_PATH="release"
+  CARGO_OPTION="--release"
 else
   echo -ne $BIRed"Unknown Option:\nHelp:\n\tDebug Mode: --debug\n\tRelease Mode: --release\n\n" $Color_Off
   exit 1
 fi
-
-HAL_PATH="$HOME/Programming/ruste-ctf/hal"
-LIB_PATH="$HOME/Programming/ruste-ctf/lib"
-EXAMPLE_PATH="$HOME/Programming/ruste-ctf/example"
-export MAXIM_PATH="/home/corigan01/Programming/ruste-ctf/example/msdk"
 
 cd $EXAMPLE_PATH
 if [ -d ./msdk ]; then
@@ -165,7 +208,6 @@ cd $LIB_PATH
 if script -e --quiet -c "cargo build $CARGO_OPTION" -O $EXAMPLE_PATH/lib-build/cargo.log > /dev/null 2>&1; then
 done_thing
 else
-echo
 echo -e $BIRed"Cargo Build Failed!!"$Color_Off
 cat $EXAMPLE_PATH/lib-build/cargo.log
 exit 1
@@ -188,7 +230,7 @@ if [ $COMP_OR_AP = "ap" ]; then
   if poetry run ectf_build_ap -d . -on ap --p 123456 -c 2 -ids "0x11111124, 0x11111125" -b "Test boot message" -t 0123456789abcdef -od build >> $EXAMPLE_PATH/lib-build/poetry.log 2>&1; then
     done_thing
   else
-    echo -e $BIRed"Failed to build Application Processor"
+    echo -e $BIRed"Failed to build Application Processor"$Color_Off
     cat $EXAMPLE_PATH/lib-build/poetry.log
     exit 1
   fi
@@ -210,7 +252,9 @@ fi
 
 
 start_thing "Waiting for device to reconnect"
-sleep 2
+while [ ! -f /dev/ttyACM0 ]; do
+  sleep 1
+done
 done_thing
 
 start_thing "Connecting"

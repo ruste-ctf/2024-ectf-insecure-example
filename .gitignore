@@ -6,6 +6,9 @@
 
 !device/lib
 
+user_dir_config.cfg
+/user_dir_config.cfg
+
 ## Begin Generic .gitignore ##
 
 # Created by https://www.toptal.com/developers/gitignore/api/python,c,c++,git,pycharm
